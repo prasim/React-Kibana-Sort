@@ -30,6 +30,20 @@
   color: #61dafb;
 }
 
+.bubble {
+  border-radius: 0.2rem;
+  padding: 0.1rem;
+}
+.bubble.green {
+  background: #cccc73;
+}
+.bubble.blue {
+  background: #d9d5ea;
+}
+.bubble.red {
+  background: #daa7c5;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -37,4 +51,9 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.card-header {
+  text-align: left;
+  font-size: medium;
 }
