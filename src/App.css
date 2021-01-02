@@ -12,6 +12,14 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
+.hidden {
+  display: none;
+}
+
+.overflow {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
 .App-header {
   background-color: #282c34;
@@ -24,12 +32,31 @@
 }
 
 .width-80 {
-  width: 80%
+  margin-top: 1rem;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+}
+.width-10 {
+  width: 10%;
+}
+.main-section {
+  width: 100%;
+  display: flex;
+  height: 100vh;
 }
 .App-link {
   color: #61dafb;
 }
-
+.button-section {
+  display: flex;
+}
+.button-section .action-button {
+  flex: 1;
+}
+.action-button .input-group {
+  width: 50%;
+}
 .bubble {
   border-radius: 0.2rem;
   padding: 0.1rem;

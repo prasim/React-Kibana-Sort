@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import moment from 'moment';
-import { Button, InputGroup, FormControl, Accordion, Card } from 'react-bootstrap';
+import { set, keys, get, del } from "idb-keyval";
+import { Button, ButtonGroup, InputGroup, FormControl, Accordion, Card } from 'react-bootstrap';
 class Home extends Component {
     constructor(props) {
       super(props);
@@ -8,6 +9,9 @@ class Home extends Component {
         logs: {},
         k8sValue: '',
         scfValue: '',
+        localStorageKeyName: '',
+        localStorageKeys: [],
+        showSaveAs: false
       };
       let localk8sKibanaLogs = localStorage.getItem('k8sLogs')
       let localscfKibanaLogs = localStorage.getItem('scfLogs')
@@ -19,11 +23,21 @@ class Home extends Component {
         // localKibanaLogs = JSON.parse(localKibanaLogs)_
         this.state.scfValue = localscfKibanaLogs;
       }
+      
       this.handlek8sChange = this.handlek8sChange.bind(this);
       this.handlescfChange = this.handlescfChange.bind(this);
       this.submit = this.submit.bind(this);
+      this.saveLog = this.saveLog.bind(this);
+      this.handleKeyNameChange = this.handleKeyNameChange.bind(this);
+      this.showThisLog = this.showThisLog.bind(this);
     }
     
+    componentDidMount() {
+      keys().then(keys => {
+        this.setState({localStorageKeys: keys})
+      });
+    }
+
     handlek8sChange(event) {
         this.setState({k8sValue: event.target.value});
     }
@@ -32,9 +46,33 @@ class Home extends Component {
       this.setState({scfValue: event.target.value});
     }
 
+    handleKeyNameChange(event) {
+      this.setState({localStorageKeyName: event.target.value});
+    }
     getRandomColor() {
       let color = "hsl(" + Math.random() * 360 + ", 100%, 75%)";
       return color;
+    }
+    showThisLog(event) {
+      
+      let getKey = event.target.value;
+      get(getKey).then(val => {
+        if (val) {
+          this.setState({logs: val,
+            k8sValue: '',
+            showSaveAs: false,
+            scfValue: ''
+          });
+        }
+      });
+    }
+    saveLog() {
+      set(this.state.localStorageKeyName, this.state.logs);
+      keys().then(keyValue => {
+        this.setState({localStorageKeys: keyValue,
+          showSaveAs: false
+        })
+      });
     }
 
     submit(event) {
@@ -103,12 +141,12 @@ class Home extends Component {
             return 0;
         })
         
-        this.setState({logs: logsArray})
+        this.setState({logs: logsArray, showSaveAs: true})
         console.log(logsArray);
     }
     
     render() {  
-        let button;
+        let button, keysListButtons;
         if (Object.keys(this.state.logs).length) {
             button = this.state.logs.map((entry, index) =>
                 <Accordion key={index}>
@@ -127,22 +165,49 @@ class Home extends Component {
               </Accordion>
             )
         } 
+        if (Object.keys(this.state.localStorageKeys).length) {
+          keysListButtons = this.state.localStorageKeys.map((entry, index) => 
+            <Button onClick={this.showThisLog} variant="link" size="sm" value={entry}>{entry}</Button>
+          ) 
+        }
       return (
-        <div className="width-80">
-            <InputGroup className="mb-3">
-                <InputGroup.Prepend>
-                <InputGroup.Text>KIBANA(K8S) Logs Object</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl as="textarea" aria-label="With textarea" value={this.state.k8sValue} onChange={this.handlek8sChange}/>
-            </InputGroup>
-            <InputGroup className="mb-3">
-                <InputGroup.Prepend>
-                <InputGroup.Text>KIBANA(SCF) Logs Object</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl as="textarea" aria-label="With textarea" value={this.state.scfValue} onChange={this.handlescfChange}/>
-            </InputGroup>
-            <Button variant="primary" onClick={this.submit}>Submit</Button>
-            {button} 
+        <div className="main-section">
+          <div className="width-10 overflow">&nbsp;
+            <ButtonGroup vertical>
+              {keysListButtons}
+            </ButtonGroup>
+          </div>
+          <div className="width-80">
+              <InputGroup className="mb-3">
+                  <InputGroup.Prepend>
+                  <InputGroup.Text>KIBANA(K8S) Logs Object</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <FormControl as="textarea" aria-label="With textarea" value={this.state.k8sValue} onChange={this.handlek8sChange}/>
+              </InputGroup>
+              <InputGroup className="mb-3">
+                  <InputGroup.Prepend>
+                  <InputGroup.Text>KIBANA(SCF) Logs Object</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <FormControl as="textarea" aria-label="With textarea" value={this.state.scfValue} onChange={this.handlescfChange}/>
+              </InputGroup>
+              <div className="button-section">
+                <div className="action-button">
+                  <Button variant="primary" onClick={this.submit}>Submit</Button>
+                </div>
+                <div className={this.state.showSaveAs ? 'action-button' : 'hidden'}>
+                  <InputGroup className="mb-3">
+                    <InputGroup.Prepend>
+                      <Button variant="outline-secondary" onClick={this.saveLog}>Save As</Button>
+                    </InputGroup.Prepend>
+                    <FormControl aria-describedby="basic-addon1" value={this.state.localStorageKeyName} onChange={this.handleKeyNameChange}/>
+                  </InputGroup>
+                </div>
+              </div>
+              <div className="overflow">
+              {button} 
+              </div>
+          </div>
+          <div className="width-10">&nbsp;</div>
         </div>
       );
     }
