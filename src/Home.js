@@ -91,7 +91,7 @@ class Home extends Component {
         }
                 
         scflogsArray.forEach((logsEntry, index) => {
-          logsEntry._source.log = logsEntry._source.msg;
+          logsEntry._source.log = logsEntry._source.request + ' ' + logsEntry._source.msg;
           let momentTime = moment.utc(logsEntry.sort[0], "x");
           logsEntry._source.timeExact = momentTime.local().format('YYYY-MM-DD HH:mm:ss.SSS')
           logsEntry.sort[1] = index;
